@@ -21,6 +21,24 @@ class ApiService {
     return await response.text();
   }
 
+  private async makePostRequest(formData: FormData): Promise<any> {
+    const response = await fetch(API_BASE_URL, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const text = await response.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: false, message: text };
+    }
+  }
+
   async login(email: string, password: string, action: string): Promise<string> {
     return this.makeRequest({
       action,
@@ -51,6 +69,28 @@ class ApiService {
   }): Promise<string> {
     return this.makeRequest({
       action: 'addholder',
+      ...holderData
+    });
+  }
+
+  async editHolder(holderData: {
+    hid: string;
+    fullname?: string;
+    mob?: string;
+    email?: string;
+  }): Promise<string> {
+    return this.makeRequest({
+      action: 'editholder',
+      ...holderData
+    });
+  }
+
+  async removeHolder(holderData: {
+    hid: string;
+    email: string;
+  }): Promise<string> {
+    return this.makeRequest({
+      action: 'removeholder',
       ...holderData
     });
   }
@@ -205,25 +245,201 @@ class ApiService {
     });
   }
 
-  async uploadFile(file: File, type: 'holder' | 'admin' | 'clientRequest', metadata: Record<string, string>): Promise<string> {
+  // File Upload Methods
+  async uploadHolderProfile(file: File, holderId: string, holderName: string): Promise<any> {
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', type);
     
-    Object.entries(metadata).forEach(([key, value]) => {
-      formData.append(key, value);
-    });
+    // Convert file to base64
+    const base64 = await this.fileToBase64(file);
+    
+    formData.append('type', 'holder');
+    formData.append('uploadType', 'profile');
+    formData.append('holderId', holderId);
+    formData.append('holderName', holderName);
+    formData.append('file', base64);
+    formData.append('filename', file.name);
+    formData.append('contentType', file.type);
 
-    const response = await fetch(API_BASE_URL, {
-      method: 'POST',
-      body: formData
-    });
+    return this.makePostRequest(formData);
+  }
 
-    if (!response.ok) {
-      throw new Error(`Upload failed: ${response.status}`);
+  async uploadHolderDocument(file: File, holderId: string, holderName: string): Promise<any> {
+    const formData = new FormData();
+    
+    // Convert file to base64
+    const base64 = await this.fileToBase64(file);
+    
+    formData.append('type', 'holder');
+    formData.append('uploadType', 'document');
+    formData.append('holderId', holderId);
+    formData.append('holderName', holderName);
+    formData.append('file', base64);
+    formData.append('filename', file.name);
+    formData.append('contentType', file.type);
+
+    return this.makePostRequest(formData);
+  }
+
+  async uploadAdminProfile(file: File, adminEmail: string): Promise<any> {
+    const formData = new FormData();
+    
+    // Convert file to base64
+    const base64 = await this.fileToBase64(file);
+    
+    formData.append('type', 'admin');
+    formData.append('uploadType', 'profile');
+    formData.append('adminEmail', adminEmail);
+    formData.append('file', base64);
+    formData.append('filename', file.name);
+    formData.append('contentType', file.type);
+
+    return this.makePostRequest(formData);
+  }
+
+  async uploadAdminDocument(file: File, adminEmail: string): Promise<any> {
+    const formData = new FormData();
+    
+    // Convert file to base64
+    const base64 = await this.fileToBase64(file);
+    
+    formData.append('type', 'admin');
+    formData.append('uploadType', 'document');
+    formData.append('adminEmail', adminEmail);
+    formData.append('file', base64);
+    formData.append('filename', file.name);
+    formData.append('contentType', file.type);
+
+    return this.makePostRequest(formData);
+  }
+
+  async uploadClientRequestFile(file: File, holderId: string, requestId: string, clientName: string): Promise<any> {
+    const formData = new FormData();
+    
+    // Convert file to base64
+    const base64 = await this.fileToBase64(file);
+    
+    formData.append('type', 'clientRequest');
+    formData.append('holderId', holderId);
+    formData.append('requestId', requestId);
+    formData.append('clientName', clientName);
+    formData.append('file', base64);
+    formData.append('filename', file.name);
+    formData.append('contentType', file.type);
+
+    return this.makePostRequest(formData);
+  }
+
+  private fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        // Remove the data:image/jpeg;base64, part
+        const base64 = result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Message System APIs
+  async adminSendMessageWithTemplate(params: {
+    template: string;
+    targetType: string;
+    targetHID?: string;
+    targetEmail?: string;
+    sentBy: string;
+    priority?: string;
+  }): Promise<any> {
+    return this.makeRequest({
+      action: 'adminSendMessageWithTemplate',
+      ...params
+    });
+  }
+
+  async getInbox(params: {
+    email: string;
+    role: string;
+  }): Promise<any> {
+    const response = await this.makeRequest({
+      action: 'getInbox',
+      ...params
+    });
+    try {
+      return JSON.parse(response);
+    } catch {
+      return { success: false, message: response };
     }
+  }
 
-    return await response.text();
+  async getClientBadgeCount(params: { hid: string }): Promise<any> {
+    const response = await this.makeRequest({
+      action: 'getClientBadgeCount',
+      ...params
+    });
+    try {
+      return JSON.parse(response);
+    } catch {
+      return { count: 0 };
+    }
+  }
+
+  async getAdminBadgeCount(): Promise<any> {
+    const response = await this.makeRequest({
+      action: 'getAdminBadgeCount'
+    });
+    try {
+      return JSON.parse(response);
+    } catch {
+      return { count: 0 };
+    }
+  }
+
+  async getClientNotifications(params: { hid: string }): Promise<any> {
+    const response = await this.makeRequest({
+      action: 'getClientNotifications',
+      ...params
+    });
+    try {
+      return JSON.parse(response);
+    } catch {
+      return { success: false, notifications: [] };
+    }
+  }
+
+  async markClientNotificationsSeen(params: { hid: string }): Promise<any> {
+    const response = await this.makeRequest({
+      action: 'markClientNotificationsSeen',
+      ...params
+    });
+    try {
+      return JSON.parse(response);
+    } catch {
+      return { success: false };
+    }
+  }
+
+  async getAdminNotifications(): Promise<any> {
+    const response = await this.makeRequest({
+      action: 'getAdminNotifications'
+    });
+    try {
+      return JSON.parse(response);
+    } catch {
+      return { success: false, notifications: [] };
+    }
+  }
+
+  async getMessageTemplates(): Promise<any> {
+    const response = await this.makeRequest({
+      action: 'getMessageTemplates'
+    });
+    try {
+      return JSON.parse(response);
+    } catch {
+      return { success: false, templates: [] };
+    }
   }
 }
 
