@@ -29,9 +29,9 @@
   @apply bg-gray-400 dark:bg-gray-500;
 }
 
-/* Smooth transitions */
+/* Smooth transitions for all elements */
 * {
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -67,6 +67,98 @@
   animation: scaleIn 0.2s ease-out;
 }
 
+.animate-bounce-in {
+  animation: bounceIn 0.6s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    transform: translateY(10px); 
+    opacity: 0; 
+  }
+  to { 
+    transform: translateY(0); 
+    opacity: 1; 
+  }
+}
+
+@keyframes scaleIn {
+  from { 
+    transform: scale(0.95); 
+    opacity: 0; 
+  }
+  to { 
+    transform: scale(1); 
+    opacity: 1; 
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  /* Improve touch targets */
+  button, a, input, select, textarea {
+    min-height: 44px;
+  }
+  
+  /* Better spacing on mobile */
+  .mobile-spacing {
+    @apply px-4 py-2;
+  }
+  
+  /* Hide scrollbars on mobile for cleaner look */
+  .mobile-hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .mobile-hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Dark mode improvements */
+.dark {
+  color-scheme: dark;
+}
+
 /* Custom gradient backgrounds */
 .gradient-bg {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -74,4 +166,124 @@
 
 .gradient-bg-dark {
   background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+}
+
+/* Loading states */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.dark .loading-shimmer {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Notification badges */
+.notification-badge {
+  @apply absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium;
+  min-width: 20px;
+}
+
+/* Message priority indicators */
+.priority-high {
+  @apply border-l-4 border-red-500 bg-red-50 dark:bg-red-900/10;
+}
+
+.priority-normal {
+  @apply border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/10;
+}
+
+.priority-low {
+  @apply border-l-4 border-gray-500 bg-gray-50 dark:bg-gray-800/50;
+}
+
+/* File upload styles */
+.file-upload-area {
+  @apply border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-gray-400 dark:hover:border-gray-500 transition-colors;
+}
+
+.file-upload-area.drag-active {
+  @apply border-blue-500 bg-blue-50 dark:bg-blue-900/20;
+}
+
+/* Chart container styles */
+.chart-container {
+  @apply bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm;
+}
+
+/* Mobile bottom navigation */
+.mobile-bottom-nav {
+  @apply fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-30;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Safe area handling for mobile devices */
+@supports (padding: max(0px)) {
+  .safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  
+  .safe-area-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+}
+
+/* Improved focus states for accessibility */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900;
+}
+
+/* Better button states */
+.btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:bg-blue-400 text-white font-medium px-4 py-2 rounded-lg transition-colors focus-ring;
+}
+
+.btn-secondary {
+  @apply bg-gray-600 hover:bg-gray-700 active:bg-gray-800 disabled:bg-gray-400 text-white font-medium px-4 py-2 rounded-lg transition-colors focus-ring;
+}
+
+.btn-success {
+  @apply bg-green-600 hover:bg-green-700 active:bg-green-800 disabled:bg-green-400 text-white font-medium px-4 py-2 rounded-lg transition-colors focus-ring;
+}
+
+.btn-danger {
+  @apply bg-red-600 hover:bg-red-700 active:bg-red-800 disabled:bg-red-400 text-white font-medium px-4 py-2 rounded-lg transition-colors focus-ring;
+}
+
+/* Card styles */
+.card {
+  @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6;
+}
+
+.card-hover {
+  @apply hover:shadow-md transition-shadow;
+}
+
+/* Input styles */
+.input-field {
+  @apply w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400;
+}
+
+/* Text styles */
+.text-primary {
+  @apply text-gray-900 dark:text-white;
+}
+
+.text-secondary {
+  @apply text-gray-600 dark:text-gray-400;
+}
+
+.text-muted {
+  @apply text-gray-500 dark:text-gray-500;
 }
