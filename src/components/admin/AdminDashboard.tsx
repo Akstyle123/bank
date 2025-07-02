@@ -6,12 +6,11 @@ import {
   TrendingUp, 
   FileText, 
   Settings,
-  Bell,
-  LogOut,
-  User,
-  Menu
+  Menu,
+  X
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import ModernNavbar from '../ui/ModernNavbar';
 import DashboardOverview from './DashboardOverview';
 import HolderManagement from './HolderManagement';
 import FinancialOperations from './FinancialOperations';
@@ -21,7 +20,7 @@ import AdminSettings from './AdminSettings';
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { currentUser, logout } = useApp();
+  const { currentUser } = useApp();
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -50,59 +49,22 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            {/* Mobile menu button */}
-            <button
-              className="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              aria-label="Toggle sidebar"
-            >
-              <Menu className="h-6 w-6" />
-            </button>
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-xl hidden md:flex">
-              <LayoutDashboard className="h-8 w-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-              <p className="text-xs md:text-sm text-gray-600">Mini Bank Management System</p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <button className="p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100">
-              <Bell className="h-5 w-5" />
-            </button>
-
-            <div className="hidden sm:flex items-center space-x-3 px-4 py-2 bg-gray-50 rounded-lg">
-              <div className="bg-blue-600 p-2 rounded-lg">
-                <User className="h-4 w-4 text-white" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">{currentUser?.email}</p>
-                <p className="text-xs text-gray-500">Administrator</p>
-              </div>
-            </div>
-
-            <button
-              onClick={logout}
-              className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="text-sm font-medium">Logout</span>
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+      {/* Modern Navbar */}
+      <ModernNavbar
+        title="Admin Dashboard"
+        subtitle="Mini Bank Management System"
+        userType="admin"
+        onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+      />
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-sm min-h-screen transform transition-transform duration-300 ease-in-out
-            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static md:inset-auto`}
+          className={`fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-gray-800 shadow-lg min-h-screen transform transition-transform duration-300 ease-in-out border-r border-gray-200 dark:border-gray-700 ${
+            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          } lg:translate-x-0 lg:static lg:inset-auto`}
+          style={{ top: '64px' }}
         >
           <nav className="p-4 space-y-2 overflow-y-auto h-full">
             {tabs.map((tab) => {
@@ -114,10 +76,10 @@ export default function AdminDashboard() {
                     setActiveTab(tab.id);
                     setSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
                     activeTab === tab.id
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                      : 'text-gray-700 hover:bg-gray-50'
+                      ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-sm'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                   }`}
                 >
                   <Icon className="h-5 w-5" />
@@ -131,13 +93,15 @@ export default function AdminDashboard() {
         {/* Overlay for mobile sidebar */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-25 z-20 md:hidden"
+            className="fixed inset-0 bg-black bg-opacity-25 z-20 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 overflow-auto">{renderContent()}</main>
+        <main className="flex-1 p-4 md:p-6 overflow-auto lg:ml-0">
+          {renderContent()}
+        </main>
       </div>
     </div>
   );
